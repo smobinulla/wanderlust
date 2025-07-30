@@ -278,6 +278,8 @@ sudo apt-get install trivy -y
   - <b>Change argocd server's service from ClusterIP to NodePort</b>
   ```bash
   kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}'
+  or
+  kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
   ```
   - <b>Confirm service is patched or not</b>
   ```bash
