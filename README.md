@@ -75,6 +75,7 @@ sudo apt-get update
 ```bash
 sudo apt-get install docker.io -y
 sudo usermod -aG docker ubuntu && newgrp docker
+# sudo usermod -aG docker azureuser && newgrp docker
 ```
 #
 - <b id="Jenkins">Install and configure Jenkins (Master machine)</b>
@@ -97,6 +98,8 @@ sudo apt-get install jenkins -y
 - <b id="EKS">Create EKS Cluster on AWS (Master machine)</b>
   - IAM user with **access keys and secret access keys**
   - AWSCLI should be configured (<a href="https://github.com/DevMadhup/DevOps-Tools-Installations/blob/main/AWSCLI/AWSCLI.sh">Setup AWSCLI</a>)
+  - OR AKS CLI should be configured
+  - curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
   ```bash
   curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
   sudo apt install unzip
@@ -127,6 +130,27 @@ sudo apt-get install jenkins -y
                       --version=1.30 \
                       --without-nodegroup
   ```
+  ---------------
+  - <b>Create AKS Cluster (Master machine)</b>
+  ```bash
+  RESOURCE_GROUP_NAME="StagingJenkinsServer"
+CLUSTER_NAME="StagingCluster"
+LOCATION="eastus"
+NODE_COUNT=2
+KUBERNETES_VERSION="1.32"
+NODE_VM_SIZE="standard_a2_v2" 
+
+az aks create \
+    --resource-group $RESOURCE_GROUP_NAME \
+    --name $CLUSTER_NAME \
+    --location $LOCATION \
+    --node-count $NODE_COUNT \
+    --node-vm-size $NODE_VM_SIZE \
+    --enable-managed-identity \
+    --generate-ssh-keys \
+    --kubernetes-version 1.32.0
+------------
+
   - <b>Associate IAM OIDC Provider (Master machine)</b>
   ```bash
   eksctl utils associate-iam-oidc-provider \
@@ -147,6 +171,15 @@ sudo apt-get install jenkins -y
                        --ssh-access \
                        --ssh-public-key=eks-nodegroup-key 
   ```
+<b> To set the context of Aks cluster use below command</b>
+az aks get-credentials --resource-group StagingJenkinsServer --name StagingCluster
+<b> To delte the cluster from the azure resouces group use below command
+az aks delete \
+    --resource-group $RESOURCE_GROUP_NAME \
+    --name $CLUSTER_NAME \
+    --yes
+
+
 > [!Note]
 >  Make sure the ssh-public-key "eks-nodegroup-key is available in your aws account"
 #
